@@ -28,7 +28,7 @@
         <section id="network-map" class="section-container">
             <h2>Interactive Railway Optimizer Network Map</h2>
             <div id="map-container" class="map-container">
-                <p>Interactive map goes here. You can integrate a map using Leaflet.js or Google Maps API to display the railway network and stations.</p>
+                <p>Interactive map goes here.</p>
             </div>
         </section>
 
@@ -37,7 +37,7 @@
             <h2>Optimization category</h2>
             <div class="form-container">
                 <div class="form-group">
-                    <label for="station-select">Select a Station:</label>
+                    <label for="station-select">Select departure station:</label>
                     <select id="station-select">
                         <option value="station1">Station 1</option>
                         <option value="station2">Station 2</option>
@@ -47,7 +47,18 @@
                         <option value="station6">Station 6</option>
                         <option value="station7">Station 7</option>
                     </select>
+                    
+                    <label for="station-select">Select destination station:</label>
+                    <select id="station-select">
+                        <option value="station2">Station 2</option>
+                        <option value="station3">Station 3</option>
+                        <option value="station4">Station 4</option>
+                        <option value="station5">Station 5</option>
+                        <option value="station6">Station 6</option>
+                        <option value="station7">Station 7</option>
+                    </select>   
                 </div>
+
                 <div class="form-group">
                     <label for="route-option">Select Optimization Type:</label>
                     <select id="route-option">
@@ -57,6 +68,7 @@
                         <option value="least-traffic-congestion">Least traffic congestion</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="train-type">Select Train Type:</label>
                     <select id="train-type">
@@ -68,6 +80,7 @@
                     </select>
                 </div>
                 <button onclick="optimizeRoutes()">Optimize Routes</button>
+
             </div>
         </section>
 
@@ -82,7 +95,7 @@
         <!-- About Section -->
         <section id="about" class="section-container">
             <h2>About Railway Network Optimization</h2>
-            <p>This website uses optimizer graph algorithms to help improve the efficiency of railway network. Whether we need to find the fastest route, the least congested path, path with minimal delays, this tool provides solutions based on real-time data. We aim to make railway transportation more efficient and cost-effective and environment friendly by reducing harmful gases emissions.</p>
+            <article> Railway Network Optimization becomes important because it can reduce unnecessary delays, operational cost, congestion at junctions, saves energy, reduces travel time, avoid unnecessary connections, can provide efficient and optimized route or best possible routes, efficient rescheduling and rerouting Often optimization allows railway to work efficiently alongside road, air, and water transportation systems, thus improving overall network system and efficiently and supply chains, increased infrastructure lifespan, reduces wear and tear, attracting investments in infrastructure and technology.</article>
         </section>
     </main>
 
