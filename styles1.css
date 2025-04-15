@@ -6,19 +6,26 @@ body {
     background-color: #f4f4f9;
     color: #333;
 }
-
 header {
+    display:flex;
     background-color: #222;
     color: white;
-    padding: 20px 0;
+    padding: 20px;
     text-align: center;
+    margin-bottom:10px;
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.8em;
 }
-
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1c1c1c; /* your dark header bg */
+    padding: 40px 30px;
+  }
 nav {
     margin-top: 10px;
 }
@@ -29,7 +36,11 @@ nav a {
     text-decoration: none;
     font-weight: 500;
 }
-
+.logo{
+    font-size:2rem;
+    font-weight:bold;
+    color:white;
+}
 nav a:hover {
     text-decoration: underline;
 }
