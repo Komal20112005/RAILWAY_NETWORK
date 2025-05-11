@@ -9,17 +9,13 @@
 
 ## 👥 Team: GraphRail Squad
 
-- **Komal Gurung (Team Lead)** - `23012809`  
-  📧 gurungkomal2005@gmail.com  
+- **Komal Gurung (Team Lead)** 
 
-- **Piyush Parmar** - `230111943`  
-  📧 piyushparmar3033@gmail.com  
+- **Piyush Parmar**  
 
-- **Deepak Tripathi** - `230111466`  
-  📧 deepaktripxthi@gmail.com  
+- **Deepak Tripathi** 
 
-- **Varsha Chuphal** - `2319829`  
-  📧 varshachuphal.23152136@gehu.ac.in  
+- **Varsha Chuphal**  
 
 ---
 
