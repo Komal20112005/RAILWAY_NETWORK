@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Railway Network Graph Algorithms</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg { background: #f4f4f4; border: 1px solid #ccc; }
+    circle { fill: #1e40af; }
+    line { stroke: #555; stroke-width: 2; }
+    .train { fill: red; stroke: black; stroke-width: 1.5; }
+    .highlight { stroke: orange; stroke-width: 4; }
+    .label { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h2>Railway Network Graph Algorithms</h2>
+  <label>Start Node:</label>
+  <select id="startNode"></select>
+  <label>End Node:</label>
+  <select id="endNode"></select>
+  <label>Algorithm:</label>
+  <select id="algorithm">
+    <option>Dijkstra</option>
+    <option>Bellman-Ford</option>
+    <option>Floyd-Warshall</option>
+    <option>Prim</option>
+    <option>Kruskal</option>
+  </select>
+  <button onclick="runAlgorithm()">Run</button>
+  <p id="cost"></p>
+
+  <svg width="1000" height="700"></svg>
+
+  <script>
+    const svg = d3.select("svg");
+
+    const graph = {
+      nodes: [
+        { id: 'A', x: 100, y: 100 },
+        { id: 'B', x: 300, y: 80 },
+        { id: 'C', x: 500, y: 120 },
+        { id: 'D', x: 700, y: 150 },
+        { id: 'E', x: 200, y: 300 },
+        { id: 'F', x: 400, y: 280 },
+        { id: 'G', x: 600, y: 320 },
+        { id: 'H', x: 800, y: 300 }
+      ],
+      edges: [
+        { source: 'A', target: 'B', weight: 4 },
+        { source: 'A', target: 'E', weight: 3 },
+        { source: 'B', target: 'C', weight: 1 },
+        { source: 'B', target: 'F', weight: 7 },
+        { source: 'C', target: 'D', weight: 6 },
+        { source: 'C', target: 'G', weight: 2 },
+        { source: 'D', target: 'H', weight: 5 },
+        { source: 'E', target: 'F', weight: 4 },
+        { source: 'F', target: 'G', weight: 1 },
+        { source: 'G', target: 'H', weight: 3 }
+      ]
+    };
+
+    const nodeById = Object.fromEntries(graph.nodes.map(n => [n.id, n]));
+
+    graph.nodes.forEach(n => {
+      d3.select("#startNode").append("option").text(n.id);
+      d3.select("#endNode").append("option").text(n.id);
+    });
+
+    const edgeGroup = svg.append("g");
+    const nodeGroup = svg.append("g");
+
+    function drawGraph(highlightedEdges = []) {
+      edgeGroup.selectAll("line, text").remove();
+      nodeGroup.selectAll("circle, text").remove();
+
+      edgeGroup.selectAll("line")
+        .data(graph.edges)
+        .enter()
+        .append("line")
+        .attr("x1", d => nodeById[d.source].x)
+        .attr("y1", d => nodeById[d.source].y)
+        .attr("x2", d => nodeById[d.target].x)
+        .attr("y2", d => nodeById[d.target].y)
+        .attr("class", d => highlightedEdges.includes(d) ? "highlight" : "")
+        .style("stroke", d => highlightedEdges.includes(d) ? "orange" : "#555")
+        .style("stroke-width", d => highlightedEdges.includes(d) ? 4 : 2);
+
+      edgeGroup.selectAll("text")
+        .data(graph.edges)
+        .enter()
+        .append("text")
+        .attr("x", d => (nodeById[d.source].x + nodeById[d.target].x) / 2)
+        .attr("y", d => (nodeById[d.source].y + nodeById[d.target].y) / 2 - 5)
+        .text(d => d.weight)
+        .attr("class", "label");
+
+      nodeGroup.selectAll("circle")
+        .data(graph.nodes)
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 10);
+
+      nodeGroup.selectAll("text")
+        .data(graph.nodes)
+        .enter()
+        .append("text")
+        .attr("x", d => d.x + 12)
+        .attr("y", d => d.y + 4)
+        .text(d => d.id);
+    }
+
+    drawGraph();
+
+    function runAlgorithm() {
+      const start = document.getElementById("startNode").value;
+      const end = document.getElementById("endNode").value;
+      const algorithm = document.getElementById("algorithm").value;
+
+      let result;
+      if (algorithm === "Dijkstra") result = dijkstra(graph, start, end);
+      else if (algorithm === "Bellman-Ford") result = bellmanFord(graph, start, end);
+      else if (algorithm === "Floyd-Warshall") result = floydWarshall(graph, start, end);
+      else if (algorithm === "Prim") result = prim(graph);
+      else if (algorithm === "Kruskal") result = kruskal(graph);
+
+      if (result?.path) animateTrain(result.path);
+      drawGraph(result?.edges || pathToEdges(result?.path || []));
+      document.getElementById("cost").textContent = result?.cost !== undefined ? `Total cost: ${result.cost}` : "";
+    }
+
+    function pathToEdges(path) {
+      const edges = [];
+      for (let i = 0; i < path.length - 1; i++) {
+        const from = path[i];
+        const to = path[i + 1];
+        const edge = graph.edges.find(e => (e.source === from && e.target === to) || (e.source === to && e.target === from));
+        if (edge) edges.push(edge);
+      }
+      return edges;
+    }
+
+    function animateTrain(path) {
+      svg.selectAll(".train").remove();
+      if (!path || path.length < 2) return;
+
+      const train = svg.append("circle").attr("class", "train").attr("r", 8);
+      let i = 0;
+      function move() {
+        if (i < path.length - 1) {
+          const from = nodeById[path[i]];
+          const to = nodeById[path[i + 1]];
+          train.attr("cx", from.x).attr("cy", from.y)
+            .transition().duration(1000)
+            .attr("cx", to.x).attr("cy", to.y)
+            .on("end", () => { i++; move(); });
+        }
+      }
+      move();
+    }
+
+    function dijkstra(graph, start, end) {
+      const dist = {}, prev = {}, Q = new Set(graph.nodes.map(n => n.id));
+      graph.nodes.forEach(n => dist[n.id] = Infinity);
+      dist[start] = 0;
+      while (Q.size) {
+        let u = [...Q].reduce((a, b) => dist[a] < dist[b] ? a : b);
+        Q.delete(u);
+        graph.edges.forEach(({ source, target, weight }) => {
+          if (source === u && Q.has(target) && dist[u] + weight < dist[target]) {
+            dist[target] = dist[u] + weight; prev[target] = u;
+          }
+          if (target === u && Q.has(source) && dist[u] + weight < dist[source]) {
+            dist[source] = dist[u] + weight; prev[source] = u;
+          }
+        });
+      }
+      const path = [];
+      for (let at = end; at; at = prev[at]) path.unshift(at);
+      return { path, cost: dist[end] };
+    }
+
+    function bellmanFord(graph, start, end) {
+      const dist = {}, prev = {};
+      graph.nodes.forEach(n => dist[n.id] = Infinity);
+      dist[start] = 0;
+      for (let i = 0; i < graph.nodes.length - 1; i++) {
+        graph.edges.forEach(({ source, target, weight }) => {
+          if (dist[source] + weight < dist[target]) {
+            dist[target] = dist[source] + weight; prev[target] = source;
+          }
+          if (dist[target] + weight < dist[source]) {
+            dist[source] = dist[target] + weight; prev[source] = target;
+          }
+        });
+      }
+      const path = [];
+      for (let at = end; at; at = prev[at]) path.unshift(at);
+      return { path, cost: dist[end] };
+    }
+
+    function floydWarshall(graph, start, end) {
+      const dist = {}, next = {};
+      graph.nodes.forEach(u => {
+        dist[u.id] = {}; next[u.id] = {};
+        graph.nodes.forEach(v => {
+          dist[u.id][v.id] = u.id === v.id ? 0 : Infinity;
+        });
+      });
+      graph.edges.forEach(({ source, target, weight }) => {
+        dist[source][target] = weight;
+        dist[target][source] = weight;
+        next[source][target] = target;
+        next[target][source] = source;
+      });
+      graph.nodes.forEach(k => {
+        graph.nodes.forEach(i => {
+          graph.nodes.forEach(j => {
+            if (dist[i.id][j.id] > dist[i.id][k.id] + dist[k.id][j.id]) {
+              dist[i.id][j.id] = dist[i.id][k.id] + dist[k.id][j.id];
+              next[i.id][j.id] = next[i.id][k.id];
+            }
+          });
+        });
+      });
+      const path = [start];
+      let u = start;
+      while (u !== end) {
+        u = next[u][end];
+        if (!u) return { path: [], cost: Infinity };
+        path.push(u);
+      }
+      return { path, cost: dist[start][end] };
+    }
+
+    function prim(graph) {
+      const edges = [], visited = new Set(), pq = [];
+      const start = graph.nodes[0].id;
+      visited.add(start);
+      graph.edges.forEach(e => {
+        if (e.source === start || e.target === start) pq.push(e);
+      });
+      while (pq.length && visited.size < graph.nodes.length) {
+        pq.sort((a, b) => a.weight - b.weight);
+        const e = pq.shift();
+        const u = visited.has(e.source) ? e.target : e.source;
+        if (visited.has(u)) continue;
+        visited.add(u); edges.push(e);
+        graph.edges.forEach(edge => {
+          if ((edge.source === u && !visited.has(edge.target)) ||
+              (edge.target === u && !visited.has(edge.source))) pq.push(edge);
+        });
+      }
+      return { edges, cost: edges.reduce((s, e) => s + e.weight, 0) };
+    }
+
+    function kruskal(graph) {
+      const parent = {}, find = u => parent[u] === u ? u : parent[u] = find(parent[u]);
+      graph.nodes.forEach(n => parent[n.id] = n.id);
+      const edges = [], sorted = graph.edges.slice().sort((a, b) => a.weight - b.weight);
+      sorted.forEach(e => {
+        const u = find(e.source), v = find(e.target);
+        if (u !== v) {
+          parent[u] = v; edges.push(e);
+        }
+      });
+      return { edges, cost: edges.reduce((s, e) => s + e.weight, 0) };
+    }
+  </script>
+</body>
+</html>
