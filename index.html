@@ -27,85 +27,45 @@
 
         <!-- About Section -->
         <section id="about" class="section-container">
-            <h2>About Railway Network Optimization</h2>
+            <div class="heading-row">
+            <h2 class="heading-text">Optimize Your <br> Railway Network</h2>
+            <img src="logo.jpeg" class="heading-image" alt="Railway Logo"/>
+        </div>
             <article>
-                Railway Network Optimization is crucial for reducing delays, congestion, and operational costs while improving route efficiency and passenger experience.
+               Enhance efficiency and reduce costs with our advanced<br> optimization tools and simulation capabilities.
             </article>
-        </section>
+            <button onclick="optionone()">Start Optimization</button>
 
-        <!-- Optimization Tools Section -->
-        <section id="optimization" class="section-container">
-            <h2>Optimization Category</h2>
-            <div class="form-container">
-                <div class="form-group">
-                    <label for="departure-station">Select Departure Station:</label>
-                    <select id="departure-station">
-                        <option value="select">select</option>
-                        <option value="station-1">station-1</option>
-                        <option value="station-2">station-2</option>
-                        <option value="station-3">station-3</option>
-                        <option value="station-4">station-4</option>
-                        <option value="station-5">station-5</option>
-                        <option value="station-6">station-6</option>
-                        <option value="station-7">station-7</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="destination-station">Select Destination Station:</label>
-                    <select id="destination-station">
-                        <option value="select">select</option>
-                        <option value="station-1">station-1</option>
-                        <option value="station-2">station-2</option>
-                        <option value="station-3">station-3</option>
-                        <option value="station-4">station-4</option>
-                        <option value="station-5">station-5</option>
-                        <option value="station-6">station-6</option>
-                        <option value="station-7">station-7</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="route-option">Select Optimization Type:</label>
-                    <select id="route-option">
-                        <option value="shortest-time">Shortest Time</option>
-                        <option value="least-cost">Least Cost</option>
-                        <option value="least-delay">Least Delay</option>
-                        <option value="least-traffic-congestion">Least Traffic Congestion</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="train-type">Select Train Type:</label>
-                    <select id="train-type">
-                        <option value="express">Express</option>
-                        <option value="local">Local</option>
-                        <option value="freight">Freight</option>
-                        <option value="metro-train">Metro (Subway)</option>
-                        <option value="sleepers">Sleepers</option>
-                    </select>
-                </div>
-
-                <div class="form-group full-width">
-                    <button onclick="optimizeRoutes()">Optimize Routes</button>
-                </div>
+            <div class="image-container">
+            <div class="image-item">
+                <a href="aboutsection.html" class="image-item" style="text-decoration: none; color: inherit;">
+                <img src="about.png" alt="About Icon">
+                <h3>About</h3>
+                <p>Learn about our approach to railway optimization and objectives of optimization</p>
+            </a>
             </div>
-        </section>
-
-        <!-- Optimization Results Section -->
-        <section id="results" class="section-container">
-            <h2>Optimization Results</h2>
-            <div id="optimization-results">
-                <p>Results of the optimization will be displayed here after running the optimization process.</p>
+            <div class="image-item">
+                <a href="featuresection.html" class="image-item" style="text-decoration: none; color: inherit;">
+                <img src="features.png" alt="Features Icon">
+                <h3>Features</h3>
+                <p>Discover the key features of our optimization system</p>
+            </a>
             </div>
-        </section>
-
-        <!-- Network Map Section -->
-        <section id="network-map" class="section-container">
-            <h2>Interactive Railway Optimizer Network Map</h2>
-            <div id="map-container" class="map-container">
-                <p>Interactive map goes here.</p>
+            <div class="image-item">
+                <a href="optimization.html" class="image-item" style="text-decoration: none; color: inherit;">
+                <img src="optimizationtools.png" alt="Optimization tools Icon">
+                <h3>Optimization<br>Tools</h3>
+                <p>Utilize out tools for route planning,cost estimation, and many more</p>
+            </a>
             </div>
+            <div class="image-item">
+                <a href="simulation.html" class="image-item" style="text-decoration: none; color: inherit;">
+                <img src="simulation.png" alt="Simulation Icon">
+                <h3>Simulation</h3>
+                <p>Run simulations to predict and improve network performance</p>
+            </a>
+            </div>
+        </div>
         </section>
     </main>
 
