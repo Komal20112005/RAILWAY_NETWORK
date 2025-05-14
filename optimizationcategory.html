@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Optimization category</title>
+        <a href=""
+    </head>
+    <body>
+        <section id="optimization" class="section-container">
+            <h2>Optimization category</h2>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="departure-station">Select Departure Station:</label>
+                    <select id="departure-station">
+                        <option value="select">select</option>
+                        <option value="station-1">station-1</option>
+                        <option value="station-2">station-2</option>
+                        <option value="station-3">station-3</option>
+                        <option value="station-4">station-4</option>
+                        <option value="station-5">station-5</option>
+                        <option value="station-6">station-6</option>
+                        <option value="station-7">station-7</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="destination-station">Select Destination Station:</label>
+                    <select id="destination-station">
+                        <option value="select">select</option>
+                        <option value="station-1">station-1</option>
+                        <option value="station-2">station-2</option>
+                        <option value="station-3">station-3</option>
+                        <option value="station-4">station-4</option>
+                        <option value="station-5">station-5</option>
+                        <option value="station-6">station-6</option>
+                        <option value="station-7">station-7</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="route-option">Select Optimization Type:</label>
+                    <select id="route-option">
+                        <option value="shortest-time">Shortest Time</option>
+                        <option value="least-cost">Least Cost</option>
+                        <option value="least-delay">Least Delay</option>
+                        <option value="least-traffic-congestion">Least Traffic Congestion</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="train-type">Select Train Type:</label>
+                    <select id="train-type">
+                        <option value="express">Express</option>
+                        <option value="local">Local</option>
+                        <option value="freight">Freight</option>
+                        <option value="metro-train">Metro (Subway)</option>
+                        <option value="sleepers">Sleepers</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <button onclick="optimizeRoutes()">Optimize Routes</button>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>
