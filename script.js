@@ -4,7 +4,7 @@ async function fetchTrainSchedulesAndShow() {
     resultDiv.textContent = 'Loading train schedules...';
     try {
         // Using a free railway API
-        const response = await fetch('https://api.railwayapi.com/v2/route/train/12301/apikey/your_api_key/');
+        const response = await fetch('https://api.railwayapi.com/v2/route/train/12301/apikey/real-time-pnr-status-api-for-indian-railways.p.rapidapi.com/');
         const data = await response.json();
         if (data && data.route) {
             let html = '<h3>Train Schedule</h3>';
@@ -84,6 +84,7 @@ async function fetchUserLocationAndShow() {
     }
 }
 
+
 // Function to initialize Google Maps
 function initMap() {
     const map = new google.maps.Map(document.getElementById('map'), {
@@ -105,9 +106,9 @@ function calculateDirections() {
         const directionsRenderer = new google.maps.DirectionsRenderer();
         directionsRenderer.setMap(map);
         const request = {
-            origin: 'New Delhi',
-            destination: 'Kanpur',
-            travelMode: 'DRIVING'
+            origin: 'New Delhi Railway Station',
+            destination: 'Kanpur Central',
+            travelMode: 'Howrah Station'
         };
         directionsService.route(request, (result, status) => {
             if (status === 'OK') {
@@ -173,7 +174,7 @@ function optionone() {
 // Load Google Maps script dynamically if not present
 if (!window.google || !window.google.maps) {
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyD3IbQ1qoJdxMTgGRVi_2iZU40QyyHvs2M&libraries=places';
     script.async = true;
     document.head.appendChild(script);
 } 
