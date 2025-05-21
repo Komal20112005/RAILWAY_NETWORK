@@ -4,7 +4,13 @@ async function fetchTrainSchedulesAndShow() {
     resultDiv.textContent = 'Loading train schedules...';
     try {
         // Using a free railway API
-        const response = await fetch('https://api.railwayapi.com/v2/route/train/12301/apikey/real-time-pnr-status-api-for-indian-railways.p.rapidapi.com/');
+        const response = await fetch('https://real-time-pnr-status-api-for-indian-railways.p.rapidapi.com/route/train/12301', {
+        method: 'GET',
+        headers: {
+            'RAILWAY_API': '2908c9e52amsh962fd743dd5c989p1835f6jsn50e6b376b3f4',
+            'RAIWAY_API_HOST': 'real-time-pnr-status-api-for-indian-railways.p.rapidapi.com'
+        }
+    });
         const data = await response.json();
         if (data && data.route) {
             let html = '<h3>Train Schedule</h3>';
@@ -58,29 +64,53 @@ async function fetchWeatherDataAndShow() {
 // Function to fetch user location using free IP Geolocation API
 async function fetchUserLocationAndShow() {
     const resultDiv = document.getElementById('map-result');
-    resultDiv.textContent = 'Detecting your location...';
-    try {
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        if (data && data.latitude && data.longitude) {
-            resultDiv.textContent = `Your location: ${data.city}, ${data.region}, ${data.country_name}`;
-            if (window.google && window.google.maps && document.getElementById('map')) {
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    center: { lat: data.latitude, lng: data.longitude },
-                    zoom: 10
-                });
-                new google.maps.Marker({
-                    position: { lat: data.latitude, lng: data.longitude },
-                    map,
-                    title: 'Your Location'
-                });
+    resultDiv.textContent = 'Detecting your location using GPS...';
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async position => {
+                const { latitude, longitude } = position.coords;
+
+                // Display coordinates
+                resultDiv.textContent = `Coordinates: Latitude ${latitude}, Longitude ${longitude}`;
+
+                // Reverse geocode using Google Maps Geocoding API
+                try {
+                    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=2ed20493d9a80d8092db42fb4c2f2fdf`);
+                    const data = await response.json();
+
+                    if (data.status === 'OK' && data.results.length > 0) {
+                        const address = data.results[0].formatted_address;
+                        resultDiv.textContent = `Your location: ${address}`;
+                    } else {
+                        resultDiv.textContent += ' (Unable to retrieve address.)';
+                    }
+                } catch (error) {
+                    console.error('Reverse geocoding failed:', error);
+                    resultDiv.textContent += ' (Reverse geocoding error.)';
+                }
+
+                // Show location on map
+                if (window.google && window.google.maps && document.getElementById('map')) {
+                    const map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: latitude, lng: longitude },
+                        zoom: 12
+                    });
+
+                    new google.maps.Marker({
+                        position: { lat: latitude, lng: longitude },
+                        map,
+                        title: 'You are here'
+                    });
+                }
+            },
+            error => {
+                resultDiv.textContent = 'Permission denied or location unavailable.';
+                console.error('Geolocation error:', error);
             }
-        } else {
-            resultDiv.textContent = 'Location data not available.';
-        }
-    } catch (e) {
-        resultDiv.textContent = 'Failed to detect location. Please try again later.';
-        console.error('Error detecting location:', e);
+        );
+    } else {
+        resultDiv.textContent = 'Geolocation not supported by your browser.';
     }
 }
 
@@ -108,7 +138,7 @@ function calculateDirections() {
         const request = {
             origin: 'New Delhi Railway Station',
             destination: 'Kanpur Central',
-            travelMode: 'Howrah Station'
+            travelMode: google.maps.TravelMode.DRIVING
         };
         directionsService.route(request, (result, status) => {
             if (status === 'OK') {
