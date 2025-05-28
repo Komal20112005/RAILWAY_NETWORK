@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -83,11 +82,6 @@
       stroke: orange;
       stroke-width: 4;
     }
-    circle.train {
-      fill: red;
-      stroke: black;
-      stroke-width: 1.5;
-    }
     text.label {
       font-size: 12px;
       user-select: none;
@@ -95,7 +89,6 @@
       font-weight: 600;
       fill: #222;
     }
-    /* Tooltip styling */
     .tooltip {
       position: absolute;
       background-color: #333;
@@ -108,7 +101,6 @@
       transition: opacity 0.2s ease;
       z-index: 10;
     }
-    /* Back button style */
     button#backBtn {
       margin-top: 20px;
       background-color: #555;
@@ -121,6 +113,10 @@
     }
     button#backBtn:hover {
       background-color: #333;
+    }
+    .negative-train {
+      opacity: 1;
+      transition: opacity 0.5s ease;
     }
   </style>
 </head>
@@ -141,11 +137,11 @@
   <button id="runBtn" disabled>Run</button>
   <p id="cost"></p>
 
-<svg width="1000" height="700"></svg>
+  <svg width="1000" height="700"></svg>
 
   <div class="tooltip" id="tooltip"></div>
 
-<button id="backBtn">Go Back</button>
+  <button id="backBtn">Go Back</button>
 
   <script>
     const svg = d3.select("svg");
@@ -159,32 +155,31 @@
 
     const graph = {
       nodes: [
-        { id: 'A', x: 100, y: 100 },
-        { id: 'B', x: 300, y: 80 },
-        { id: 'C', x: 500, y: 120 },
-        { id: 'D', x: 700, y: 150 },
-        { id: 'E', x: 200, y: 300 },
-        { id: 'F', x: 400, y: 280 },
-        { id: 'G', x: 600, y: 320 },
-        { id: 'H', x: 800, y: 300 }
+        { id: 'Dehradun', x: 100, y: 100 },
+        { id: 'Harrawala', x: 300, y: 80 },
+        { id: 'Doiwala', x: 500, y: 120 },
+        { id: 'Raiwala', x: 700, y: 150 },
+        { id: 'Kansrao', x: 200, y: 300 },
+        { id: 'Mohkampur', x: 400, y: 280 },
+        { id: 'Lachhiwala', x: 600, y: 320 },
+        { id: 'Motichur', x: 800, y: 300 }
       ],
       edges: [
-        { source: 'A', target: 'B', weight: 4 },
-        { source: 'A', target: 'E', weight: 3 },
-        { source: 'B', target: 'C', weight: 1 },
-        { source: 'B', target: 'F', weight: 7 },
-        { source: 'C', target: 'D', weight: 6 },
-        { source: 'C', target: 'G', weight: 2 },
-        { source: 'D', target: 'H', weight: 5 },
-        { source: 'E', target: 'F', weight: 4 },
-        { source: 'F', target: 'G', weight: 1 },
-        { source: 'G', target: 'H', weight: 3 }
+        { source: 'Dehradun', target: 'Harrawala', weight: 4 },
+        { source: 'Dehradun', target: 'Kansrao', weight: 3 },
+        { source: 'Harrawala', target: 'Doiwala', weight: -5 },
+        { source: 'Harrawala', target: 'Mohkampur', weight: 7 },
+        { source: 'Doiwala', target: 'Raiwala', weight: 6 },
+        { source: 'Doiwala', target: 'Lachhiwala', weight: 2 },
+        { source: 'Raiwala', target: 'Motichur', weight: 5 },
+        { source: 'Kansrao', target: 'Mohkampur', weight: 4 },
+        { source: 'Mohkampur', target: 'Lachhiwala', weight: -3 },
+        { source: 'Lachhiwala', target: 'Motichur', weight: 3 }
       ]
     };
 
     const nodeById = Object.fromEntries(graph.nodes.map(n => [n.id, n]));
 
-    // Populate start and end node dropdowns
     function populateDropdowns() {
       graph.nodes.forEach(n => {
         const optionStart = document.createElement("option");
@@ -197,19 +192,14 @@
         optionEnd.textContent = n.id;
         endSelect.appendChild(optionEnd);
       });
-      // Set defaults
+
       startSelect.selectedIndex = 0;
       endSelect.selectedIndex = 1;
       validateSelection();
     }
 
-    // Enable or disable run button based on valid selections
     function validateSelection() {
-      if (
-        startSelect.value &&
-        endSelect.value &&
-        startSelect.value !== endSelect.value
-      ) {
+      if (startSelect.value && endSelect.value && startSelect.value !== endSelect.value) {
         runBtn.disabled = false;
       } else {
         runBtn.disabled = true;
@@ -220,381 +210,341 @@
     startSelect.addEventListener("change", validateSelection);
     endSelect.addEventListener("change", validateSelection);
 
-    // Groups for edges and nodes
-    const edgeGroup = svg.append("g").attr("class", "edges");
-    const nodeGroup = svg.append("g").attr("class", "nodes");
-
-    // Draw graph with optional highlighted edges
     function drawGraph(highlightedEdges = []) {
-      edgeGroup.selectAll("*").remove();
-      nodeGroup.selectAll("*").remove();
+      svg.selectAll(".negative-train").remove();
+      svg.selectAll(".link").remove();
+      svg.selectAll(".node").remove();
+      svg.selectAll(".label").remove();
 
-      // Draw edges
-      edgeGroup.selectAll("line")
+      const linkGroup = svg.append("g").attr("class", "edges");
+      linkGroup.selectAll("line")
         .data(graph.edges)
         .enter()
         .append("line")
-        .attr("class", d => highlightedEdges.includes(d) ? "edge highlight" : "edge")
+        .attr("class", d => highlightedEdges.includes(d) ? "highlight edge" : "link")
         .attr("x1", d => nodeById[d.source].x)
         .attr("y1", d => nodeById[d.source].y)
         .attr("x2", d => nodeById[d.target].x)
         .attr("y2", d => nodeById[d.target].y)
-        .on("mousemove", (event, d) => {
-          tooltip.style("opacity", 1)
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY + 10) + "px")
-            .html(`Edge: <strong>${d.source} ↔ ${d.target}</strong><br>Weight: ${d.weight}`);
-        })
-        .on("mouseout", () => tooltip.style("opacity", 0));
+        .attr("stroke-width", 2)
+        .attr("stroke", d => d.weight < 0 ? "red" : "gray");
 
-      // Edge weight labels
-      edgeGroup.selectAll("text")
+      svg.selectAll(".label")
         .data(graph.edges)
         .enter()
         .append("text")
         .attr("class", "label")
         .attr("x", d => (nodeById[d.source].x + nodeById[d.target].x) / 2)
-        .attr("y", d => (nodeById[d.source].y + nodeById[d.target].y) / 2 - 8)
+        .attr("y", d => (nodeById[d.source].y + nodeById[d.target].y) / 2)
         .text(d => d.weight);
 
-      // Draw nodes
-      nodeGroup.selectAll("circle")
+      const nodeGroup = svg.append("g").attr("class", "nodes");
+      const nodeElements = nodeGroup.selectAll(".node")
         .data(graph.nodes)
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("r", 12)
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .on("mousemove", (event, d) => {
-          tooltip.style("opacity", 1)
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY + 10) + "px")
-            .html(`Node: <strong>${d.id}</strong>`);
-        })
-        .on("mouseout", () => tooltip.style("opacity", 0));
+        .attr("r", 15)
+        .attr("cx", n => n.x)
+        .attr("cy", n => n.y);
 
-      // Node labels
-      nodeGroup.selectAll("text")
+      nodeElements.on("mouseover", (event, node) => {
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(`Node: ${node.id}`).style("left", `${event.pageX + 5}px`).style("top", `${event.pageY - 30}px`);
+      });
+
+      nodeElements.on("mouseout", () => {
+        tooltip.transition().duration(200).style("opacity", 0);
+      });
+
+      nodeGroup.selectAll(".label")
         .data(graph.nodes)
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", d => d.x + 16)
-        .attr("y", d => d.y + 5)
-        .text(d => d.id);
+        .attr("x", n => n.x)
+        .attr("y", n => n.y - 20)
+        .attr("text-anchor", "middle")
+        .text(n => n.id);
     }
 
-    // Convert path array to edges array
-    function pathToEdges(path) {
-      const edges = [];
-      for (let i = 0; i < path.length - 1; i++) {
-        const from = path[i];
-        const to = path[i + 1];
-        const edge = graph.edges.find(e => 
-          (e.source === from && e.target === to) || (e.source === to && e.target === from));
-        if (edge) edges.push(edge);
-      }
-      return edges;
-    }
-
-    // Animate train along path
-    function animateTrain(path) {
-      svg.selectAll(".train").remove();
-      if (!path || path.length < 2) return;
-
-      const train = svg.append("circle").attr("class", "train").attr("r", 10);
-      let i = 0;
-
-      function move() {
-        if (i < path.length - 1) {
-          const from = nodeById[path[i]];
-          const to = nodeById[path[i + 1]];
-          train.attr("cx", from.x).attr("cy", from.y)
-            .transition()
-            .duration(1000)
-            .attr("cx", to.x)
-            .attr("cy", to.y)
-            .on("end", () => {
-              i++;
-              setTimeout(move, 400); // pause 400ms at node
-            });
-        } else {
-          // Animation complete, remove train after short delay
-          setTimeout(() => train.remove(), 800);
-        }
-      }
-      move();
-    }
-
-    // Run button click handler
-    function runAlgorithm() {
-      const start = startSelect.value;
-      const end = endSelect.value;
-      const algorithm = algorithmSelect.value;
-
-      let result;
-      if (algorithm === "Dijkstra") result = dijkstra(graph, start, end);
-      else if (algorithm === "Bellman-Ford") result = bellmanFord(graph, start, end);
-      else if (algorithm === "Floyd-Warshall") result = floydWarshall(graph, start, end);
-      else if (algorithm === "Prim") result = prim(graph);
-      else if (algorithm === "Kruskal") result = kruskal(graph);
-
-      if (!result) {
-        costDisplay.textContent = "Algorithm not implemented or error.";
-        drawGraph();
-        return;
-      }
-
-      // For shortest path algorithms
-      if (result.path && result.path.length > 0) {
-        animateTrain(result.path);
-        drawGraph(result.edges || pathToEdges(result.path));
-        costDisplay.textContent = `Total cost: ${result.cost === Infinity ? "No path" : result.cost}`;
-      } else if (result.edges) {
-        // For MST algorithms (Prim, Kruskal)
-        animateTrain(null);
-        drawGraph(result.edges);
-        costDisplay.textContent = `Total cost: ${result.cost}`;
-      } else {
-        drawGraph();
-        costDisplay.textContent = "No path found.";
-      }
-    }
-
-    runBtn.addEventListener("click", runAlgorithm);
-     algorithmSelect.addEventListener("change", () => {
-      // Disable end node selection for Prim and Kruskal (MST algorithms)
-      const algo = algorithmSelect.value;
-      if (algo === "Prim" || algo === "Kruskal" || algo === "Floyd-Warshall") {
-        endSelect.disabled = true;
-      } else {
-        endSelect.disabled = false;
-      }
-      validateSelection();
-      costDisplay.textContent = "";
-      drawGraph();
-      svg.selectAll(".train").remove();
-    });
-
-    // Initial setup
-    populateDropdowns();
-    drawGraph();
-
-    // --- Algorithm implementations ---
-
-    // Helper: Get neighbors of a node with weights
-    function getNeighbors(nodeId) {
-      return graph.edges
-        .filter(e => e.source === nodeId || e.target === nodeId)
-        .map(e => {
-          const neighbor = e.source === nodeId ? e.target : e.source;
-          return { node: neighbor, weight: e.weight };
-        });
-    }
-
-    // Dijkstra's algorithm
-    function dijkstra(graph, start, end) {
-      const distances = {};
+    function dijkstra(start, end) {
+      const dist = {};
       const prev = {};
-      const nodes = new Set(graph.nodes.map(n => n.id));
+      const visited = new Set();
+      const pq = new PriorityQueue();
 
-      graph.nodes.forEach(n => distances[n.id] = Infinity);
-      distances[start] = 0;
+      graph.nodes.forEach(n => {
+        dist[n.id] = Infinity;
+        prev[n.id] = null;
+      });
+      dist[start] = 0;
+      pq.enqueue(start, 0);
 
-      while (nodes.size) {
-        let current = null;
-        nodes.forEach(n => {
-          if (current === null || distances[n] < distances[current]) current = n;
-        });
+      while (!pq.isEmpty()) {
+        const u = pq.dequeue().element;
 
-        if (distances[current] === Infinity) break;
-        if (current === end) break;
+        if (u === end) break;
 
-        nodes.delete(current);
+        graph.edges.filter(e => e.source === u).forEach(edge => {
+          const v = edge.target;
+          const alt = dist[u] + edge.weight;
 
-        getNeighbors(current).forEach(({node, weight}) => {
-          if (!nodes.has(node)) return;
-          let alt = distances[current] + weight;
-          if (alt < distances[node]) {
-            distances[node] = alt;
-            prev[node] = current;
+          if (alt < dist[v]) {
+            dist[v] = alt;
+            prev[v] = u;
+            pq.enqueue(v, dist[v]);
           }
         });
       }
 
-      // Reconstruct path
       let path = [];
-      let u = end;
-      if (prev[u] !== undefined || u === start) {
-        while (u) {
-          path.unshift(u);
-          u = prev[u];
-        }
+      let currentNode = end;
+      while (currentNode) {
+        path.unshift(currentNode);
+        currentNode = prev[currentNode];
       }
 
-      return {
-        path,
-        cost: distances[end],
-        edges: pathToEdges(path)
-      };
+      drawGraph(path);
+      animateTrain(path);
+      costDisplay.textContent = `Cost: ${dist[end]}`;
     }
 
-    // Bellman-Ford algorithm
-    function bellmanFord(graph, start, end) {
-      const distances = {};
+    function bellmanFord(start, end) {
+      const dist = {};
       const prev = {};
 
-      graph.nodes.forEach(n => distances[n.id] = Infinity);
-      distances[start] = 0;
+      graph.nodes.forEach(n => {
+        dist[n.id] = Infinity;
+        prev[n.id] = null;
+      });
+      dist[start] = 0;
 
       for (let i = 0; i < graph.nodes.length - 1; i++) {
-        graph.edges.forEach(({source, target, weight}) => {
-          if (distances[source] + weight < distances[target]) {
-            distances[target] = distances[source] + weight;
-            prev[target] = source;
-          }
-          if (distances[target] + weight < distances[source]) {
-            distances[source] = distances[target] + weight;
-            prev[source] = target;
+        graph.edges.forEach(edge => {
+          const u = edge.source;
+          const v = edge.target;
+          const weight = edge.weight;
+          if (dist[u] !== Infinity && dist[u] + weight < dist[v]) {
+            dist[v] = dist[u] + weight;
+            prev[v] = u;
           }
         });
       }
 
-      // Check for negative-weight cycles (optional here)
-      for (const {source, target, weight} of graph.edges) {
-        if (distances[source] + weight < distances[target]) {
-          costDisplay.textContent = "Graph contains a negative-weight cycle.";
-          return null;
+      // Check for negative weight cycle
+      graph.edges.forEach(edge => {
+        const u = edge.source;
+        const v = edge.target;
+        const weight = edge.weight;
+        if (dist[u] !== Infinity && dist[u] + weight < dist[v]) {
+          console.error("Graph contains a negative weight cycle");
         }
-      }
+      });
 
-      // Reconstruct path
       let path = [];
-      let u = end;
-      if (prev[u] !== undefined || u === start) {
-        while (u) {
-          path.unshift(u);
-          u = prev[u];
-        }
+      let currentNode = end;
+      while (currentNode) {
+        path.unshift(currentNode);
+        currentNode = prev[currentNode];
       }
 
-      return {
-        path,
-        cost: distances[end],
-        edges: pathToEdges(path)
-      };
+      drawGraph(path);
+      animateTrain(path);
+      costDisplay.textContent = `Cost: ${dist[end]}`;
     }
 
-    // Floyd-Warshall algorithm
-    function floydWarshall(graph) {
-      const nodes = graph.nodes.map(n => n.id);
+    function floydWarshall() {
       const dist = {};
-      const next = {};
+      const prev = {};
 
-      nodes.forEach(i => {
-        dist[i] = {};
-        next[i] = {};
-        nodes.forEach(j => {
-          dist[i][j] = i === j ? 0 : Infinity;
-          next[i][j] = null;
+      // Initialize the distance and previous nodes
+      graph.nodes.forEach(n => {
+        dist[n.id] = {};
+        prev[n.id] = {};
+        graph.nodes.forEach(m => {
+          dist[n.id][m.id] = Infinity;
+          prev[n.id][m.id] = null;
         });
+        dist[n.id][n.id] = 0;
       });
 
-      graph.edges.forEach(({source, target, weight}) => {
-        dist[source][target] = weight;
-        dist[target][source] = weight;
-        next[source][target] = target;
-        next[target][source] = source;
+      graph.edges.forEach(edge => {
+        dist[edge.source][edge.target] = edge.weight;
+        prev[edge.source][edge.target] = edge.source;
       });
 
-      nodes.forEach(k => {
-        nodes.forEach(i => {
-          nodes.forEach(j => {
-            if (dist[i][k] + dist[k][j] < dist[i][j]) {
-              dist[i][j] = dist[i][k] + dist[k][j];
-              next[i][j] = next[i][k];
+      // Perform the Floyd-Warshall algorithm
+      graph.nodes.forEach(k => {
+        graph.nodes.forEach(i => {
+          graph.nodes.forEach(j => {
+            if (dist[i.id][j.id] > dist[i.id][k.id] + dist[k.id][j.id]) {
+              dist[i.id][j.id] = dist[i.id][k.id] + dist[k.id][j.id];
+              prev[i.id][j.id] = prev[k.id][j.id];
             }
           });
         });
       });
 
-      // Since endSelect disabled for FW, we show all shortest paths or MST
-      // Here just highlight all shortest paths between all pairs, or none
-      costDisplay.textContent = "Floyd-Warshall shows shortest paths between all nodes.";
+      let path = [];
+      let currentNode = endSelect.value;
+      while (currentNode) {
+        path.unshift(currentNode);
+        currentNode = prev[startSelect.value][currentNode];
+      }
 
-      // We can just draw the graph normally, no path animation (complex)
-      drawGraph();
-
-      return {};
+      drawGraph(path);
+      animateTrain(path);
+      costDisplay.textContent = `Cost: ${dist[startSelect.value][endSelect.value]}`;
     }
 
-    // Prim's algorithm for MST
-    function prim(graph) {
-      const nodes = graph.nodes.map(n => n.id);
-      const selected = new Set();
-      const edges = [];
-      let totalCost = 0;
-
-      selected.add(nodes[0]);
-
-      while (selected.size < nodes.length) {
-        let candidate = null;
-        let candidateEdge = null;
-        graph.edges.forEach(e => {
-          const inSelectedSource = selected.has(e.source);
-          const inSelectedTarget = selected.has(e.target);
-
-          if ((inSelectedSource && !inSelectedTarget) || (!inSelectedSource && inSelectedTarget)) {
-            if (!candidate || e.weight < candidate.weight) {
-              candidate = e;
-              candidateEdge = e;
-            }
-          }
-        });
-        if (!candidate) break;
-
-        edges.push(candidateEdge);
-        totalCost += candidateEdge.weight;
-        selected.add(candidateEdge.source);
-        selected.add(candidateEdge.target);
+    class PriorityQueue {
+      constructor() {
+        this.items = [];
       }
 
-      return { edges, cost: totalCost };
+      enqueue(element, priority) {
+        this.items.push({ element, priority });
+        this.items.sort((a, b) => a.priority - b.priority);
+      }
+
+      dequeue() {
+        return this.items.shift();
+      }
+
+      isEmpty() {
+        return this.items.length === 0;
+      }
     }
+function animateTrain(pathNodes) {
+  if (pathNodes.length < 2) return;
 
-    // Kruskal's algorithm for MST
-    function kruskal(graph) {
-      // Union-Find helper functions
-      const parent = {};
-      function find(u) {
-        if (parent[u] === undefined) parent[u] = u;
-        if (parent[u] !== u) parent[u] = find(parent[u]);
-        return parent[u];
-      }
-      function union(u, v) {
-        const rootU = find(u);
-        const rootV = find(v);
-        if (rootU !== rootV) {
-          parent[rootV] = rootU;
-          return true;
-        }
-        return false;
-      }
+  svg.selectAll(".negative-train").remove();
 
-      const edgesSorted = [...graph.edges].sort((a, b) => a.weight - b.weight);
-      const mstEdges = [];
-      let totalCost = 0;
+  const trainGroup = svg.append("g")
+    .attr("class", "negative-train")
+    .attr("transform", `translate(${nodeById[pathNodes[0]].x}, ${nodeById[pathNodes[0]].y})`);
 
-      edgesSorted.forEach(e => {
-        if (union(e.source, e.target)) {
-          mstEdges.push(e);
-          totalCost += e.weight;
+  // Bullet train body (rounded rectangle)
+  trainGroup.append("rect")
+    .attr("x", -20)
+    .attr("y", -10)
+    .attr("width", 40)
+    .attr("height", 20)
+    .attr("rx", 10)
+    .attr("ry", 10)
+    .attr("fill", "#e0f2fe") // Light bluish
+    .attr("stroke", "#0f172a") // Dark outline
+    .attr("stroke-width", 1.5);
+
+  // Train window strip
+  trainGroup.append("rect")
+    .attr("x", -14)
+    .attr("y", -6)
+    .attr("width", 28)
+    .attr("height", 5)
+    .attr("fill", "#1e3a8a");
+
+  // Windows (optional - small)
+  for (let i = -10; i <= 10; i += 8) {
+    trainGroup.append("rect")
+      .attr("x", i)
+      .attr("y", -5)
+      .attr("width", 4)
+      .attr("height", 3)
+      .attr("fill", "#93c5fd");
+  }
+
+  // Nose cone (stylized front)
+  trainGroup.append("path")
+    .attr("d", "M20,-10 Q30,0 20,10")
+    .attr("fill", "#60a5fa");
+
+  // Wheels
+  trainGroup.append("circle")
+    .attr("cx", -12)
+    .attr("cy", 11)
+    .attr("r", 3)
+    .attr("fill", "#0f172a");
+
+  trainGroup.append("circle")
+    .attr("cx", 12)
+    .attr("cy", 11)
+    .attr("r", 3)
+    .attr("fill", "#0f172a");
+
+  let i = 0;
+
+  function moveNext() {
+    if (i >= pathNodes.length - 1) return;
+
+    const from = nodeById[pathNodes[i]];
+    const to = nodeById[pathNodes[i + 1]];
+    const edge = graph.edges.find(e => e.source === from.id && e.target === to.id);
+    if (!edge) return;
+
+    const duration = 1000;
+
+    trainGroup.transition()
+      .duration(duration)
+      .attr("transform", `translate(${to.x}, ${to.y})`)
+      .on("end", () => {
+        if (edge.weight < 0) {
+          // Reverse back
+          trainGroup.transition()
+            .duration(duration)
+            .attr("transform", `translate(${from.x}, ${from.y})`)
+            .on("end", () => {
+              // Continue forward again
+              trainGroup.transition()
+                .duration(duration)
+                .attr("transform", `translate(${to.x}, ${to.y})`)
+                .on("end", () => {
+                  i++;
+                  moveNext();
+                });
+            });
+        } else {
+          i++;
+          moveNext();
         }
       });
+  }
 
-      return { edges: mstEdges, cost: totalCost };
-    }
+  moveNext();
+}
+
+    // Add event listener for running the algorithm
+    runBtn.addEventListener("click", () => {
+      const start = startSelect.value;
+      const end = endSelect.value;
+      const algorithm = algorithmSelect.value;
+
+      costDisplay.textContent = "";
+
+      switch (algorithm) {
+        case "Dijkstra":
+          dijkstra(start, end);
+          break;
+        case "Bellman-Ford":
+          bellmanFord(start, end);
+          break;
+        case "Floyd-Warshall":
+          floydWarshall();
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Go Back button
+    backBtn.addEventListener("click", () => {
+      window.history.back();
+    });
+
+    // Initial population of dropdowns and graph rendering
+    populateDropdowns();
+    drawGraph();
   </script>
 </body>
 </html>
